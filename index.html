@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLH Manager Assignment Automation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 25%, #ff6b6b 50%, #ffa726 75%, #48bb78 100%);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .header h1 {
+            color: #1a202c;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .header .subtitle {
+            color: #4a5568;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 2px solid #f6ad55;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instructions::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f6ad55 0%, #ffa726 100%);
+        }
+
+        .instructions h3 {
+            color: #744210;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #8b5a00;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .upload-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(79, 172, 254, 0.3);
+        }
+
+        .upload-card:hover::before {
+            opacity: 1;
+        }
+
+        .upload-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .file-input:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .file-input::file-selector-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4facfe;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-right: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .file-input::file-selector-button:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        .company-filter {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .company-filter label {
+            font-weight: 700;
+            margin-right: 15px;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .company-filter select {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid #cbd5e0;
+            background: white;
+            min-width: 250px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+
+        .company-filter select:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            outline: none;
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+            font-weight: 700;
+            margin: 30px auto;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .process-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .process-btn:hover::before {
+            left: 100%;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 45px rgba(255, 107, 107, 0.5);
+        }
+
+        .process-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 5px 15px rgba(203, 213, 224, 0.3);
+        }
+
+        .results-section {
+            margin-top: 50px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 18px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(168, 237, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .output-area {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 30px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .output-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .output-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .output-area::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .output-area::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(72, 187, 120, 0.4);
+        }
+
+        .file-status {
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-success {
+            background: rgba(72, 187, 120, 0.15);
+            color: #2f855a;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .file-error {
+            background: rgba(245, 101, 101, 0.15);
+            color: #c53030;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .copyright::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .copyright p {
+            margin-bottom: 8px;
+        }
+
+        .copyright .author {
+            font-weight: 700;
+            color: #4a5568;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .company-filter select {
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .process-btn {
+                padding: 15px 35px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KLH Manager Assignment Automation</h1>
+            <p class="subtitle">Professional bulk manager role assignment tool for Kinaxis Learning Hub</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instructions</h3>
+            <ul>
+                <li><strong>Step 1:</strong> Upload the exported user data file from KLH (CSV format)</li>
+                <li><strong>Step 2:</strong> Upload the team data file containing admin information (CSV format)</li>
+                <li><strong>Step 3:</strong> Select target company or leave on auto-detect</li>
+                <li><strong>Step 4:</strong> Click "Process Assignment" to generate bulk assignment data</li>
+                <li><strong>Step 5:</strong> Download the generated CSV file for bulk upload to KLH</li>
+            </ul>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-card">
+                <h3>📊 KLH Export File</h3>
+                <div class="file-input-wrapper">
+                    <input type="file" id="klhFile" class="file-input" accept=".csv">
+                </div>
+                <div id="klhStatus" class="file-status" style="display: none;"></div>
+            </div>
+            
+            <div class="upload-card">
+                <h3>👥 Team Data File</h3>
+                <div class="file-input-wrapper">
+                    <input type="file" id="teamFile" class="file-input" accept=".csv">
+                </div>
+                <div id="teamStatus" class="file-status" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="company-filter">
+            <label for="companySelect">🏢 Select Company:</label>
+            <select id="companySelect">
+                <option value="">Auto-detect from files</option>
+            </select>
+        </div>
+
+        <button id="processBtn" class="process-btn" disabled>🚀 Process Assignment</button>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div class="stats">
+                <div class="stat-card">
+                    <div id="totalUsers" class="stat-number">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div id="totalManagers" class="stat-number">0</div>
+                    <div class="stat-label">Managers Found</div>
+                </div>
+                <div class="stat-card">
+                    <div id="assignmentsCreated" class="stat-number">0</div>
+                    <div class="stat-label">Assignments Created</div>
+                </div>
+            </div>
+
+            <div id="outputArea" class="output-area"></div>
+            
+            <button id="downloadBtn" class="download-btn">
+                📥 Download CSV File
+            </button>
+        </div>
+
+        <div class="copyright">
+            <p class="author">© 2025 Harry Mehta</p>
+            <p>KLH Manager Assignment Automation Tool - All Rights Reserved</p>
+        </div>
+    </div>
+
+    <script>
+        let klhData = null;
+        let teamData = null;
+        let processedOutput = '';
+
+        document.getElementById('klhFile').addEventListener('change', handleKLHFile);
+        document.getElementById('teamFile').addEventListener('change', handleTeamFile);
+        document.getElementById('processBtn').addEventListener('click', processAssignment);
+        document.getElementById('downloadBtn').addEventListener('click', downloadCSV);
+
+        function handleKLHFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        klhData = results.data;
+                        showFileStatus('klhStatus', `✅ Successfully loaded ${klhData.length} users from KLH export`, 'success');
+                        updateCompanyDropdown();
+                        checkReadyToProcess();
+                    },
+                    error: function(error) {
+                        showFileStatus('klhStatus', `❌ Error reading file: ${error.message}`, 'error');
+                    }
+                });
+            }
+        }
+
+        function handleTeamFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        teamData = results.data;
+                        showFileStatus('teamStatus', `✅ Successfully loaded ${teamData.length} records from team data`, 'success');
+                        updateCompanyDropdown();
+                        checkReadyToProcess();
+                    },
+                    error: function(error) {
+                        showFileStatus('teamStatus', `❌ Error reading file: ${error.message}`, 'error');
+                    }
+                });
+            }
+        }
+
+        function updateCompanyDropdown() {
+            const companySelect = document.getElementById('companySelect');
+            const companies = new Set();
+            
+            if (klhData) {
+                klhData.forEach(user => {
+                    // Extract company from email domain
+                    const email = user['Email'] || user['Email Address'];
+                    if (email && email.includes('@')) {
+                        const domain = email.split('@')[1];
+                        const company = domain.split('.')[0];
+                        companies.add(company);
+                    }
+                });
+            }
+            
+            if (teamData) {
+                teamData.forEach(user => {
+                    const dept = user['Department'];
+                    if (dept) {
+                        companies.add(dept);
+                    }
+                    // Also extract from email
+                    const email = user['Email Address'] || user['Email'];
+                    if (email && email.includes('@')) {
+                        const domain = email.split('@')[1];
+                        const company = domain.split('.')[0];
+                        companies.add(company);
+                    }
+                });
+            }
+            
+            // Clear existing options except first
+            companySelect.innerHTML = '<option value="">Auto-detect from files</option>';
+            
+            // Add company options
+            [...companies].sort().forEach(company => {
+                const option = document.createElement('option');
+                option.value = company;
+                option.textContent = company.charAt(0).toUpperCase() + company.slice(1);
+                companySelect.appendChild(option);
+            });
+        }
+
+        function showFileStatus(elementId, message, type) {
+            const statusEl = document.getElementById(elementId);
+            statusEl.textContent = message;
+            statusEl.className = `file-status file-${type}`;
+            statusEl.style.display = 'flex';
+        }
+
+        function checkReadyToProcess() {
+            const processBtn = document.getElementById('processBtn');
+            if (klhData && teamData) {
+                processBtn.disabled = false;
+                processBtn.textContent = '🚀 Process Assignment';
+            }
+        }
+
+        function processAssignment() {
+            if (!klhData || !teamData) return;
+
+            const selectedCompany = document.getElementById('companySelect').value.toLowerCase();
+            const assignments = [];
+            const managers = [];
+            
+            // Helper function to extract company name from email
+            function getCompanyFromEmail(email) {
+                if (!email || !email.includes('@')) return '';
+                const domain = email.split('@')[1];
+                return domain.split('.')[0].toLowerCase();
+            }
+            
+            // Helper function to check if user belongs to target company
+            function belongsToCompany(user, targetCompany) {
+                if (!targetCompany) return true; // If no company filter, include all
+                
+                const email = user['Email'] || user['Email Address'] || user['Username'] || '';
+                const department = (user['Department'] || '').toLowerCase();
+                const emailCompany = getCompanyFromEmail(email);
+                
+                return emailCompany === targetCompany || 
+                       department.includes(targetCompany) ||
+                       email.toLowerCase().includes(targetCompany);
+            }
+            
+            // Find target company from KLH data if not manually selected
+            let targetCompany = selectedCompany;
+            if (!targetCompany && klhData.length > 0) {
+                const firstUserEmail = klhData[0]['Email'] || klhData[0]['Email Address'] || '';
+                targetCompany = getCompanyFromEmail(firstUserEmail);
+            }
+            
+            // Filter KLH users for target company only
+            const filteredKLHUsers = klhData.filter(user => belongsToCompany(user, targetCompany));
+            
+            // Find managers from team data for the same company
+            teamData.forEach(user => {
+                if (user['Is Admin'] === 'Yes' && belongsToCompany(user, targetCompany)) {
+                    const managerEmail = user['Email Address'] || user['Email'] || user['Username'];
+                    if (managerEmail) {
+                        managers.push({
+                            email: managerEmail,
+                            name: `${user['First Name'] || ''} ${user['Last Name'] || ''}`.trim() || managerEmail,
+                            department: user['Department'] || ''
+                        });
+                    }
+                }
+            });
+            
+            // Get managees (non-admin users from KLH export)
+            const managerEmails = new Set(managers.map(m => m.email.toLowerCase()));
+            const managees = filteredKLHUsers
+                .filter(user => {
+                    const userEmail = (user['Email'] || user['Email Address'] || user['Username'] || '').toLowerCase();
+                    return userEmail && !managerEmails.has(userEmail);
+                })
+                .map(user => user['Email'] || user['Email Address'] || user['Username'])
+                .filter(email => email);
+            
+            // Generate output in the required format
+            let output = `Company: ${targetCompany.toUpperCase()}\n`;
+            output += `Total Managees: ${managees.length}\n`;
+            output += `Total Managers: ${managers.length}\n\n`;
+            
+            if (managers.length === 0) {
+                output += "⚠️  No managers found for this company!\n";
+                output += "Please check that:\n";
+                output += "- The company filter is correct\n";
+                output += "- Your team data file has users marked as 'Is Admin' = 'Yes'\n";
+                output += "- The email domains match between files\n\n";
+            }
+            
+            if (managees.length === 0) {
+                output += "⚠️  No managees found for this company!\n\n";
+            }
+            
+            // Generate assignments for each manager
+            let csvOutput = 'Managee,Manager\n';
+            let assignmentCount = 0;
+            
+            managers.forEach((manager, index) => {
+                output += `=== MANAGER ${index + 1}: ${manager.name} (${manager.email}) ===\n\n`;
+                
+                // List all managees first
+                output += "Managees:\n";
+                managees.forEach(managee => {
+                    output += `${managee}\n`;
+                });
+                output += "\n";
+                
+                // Then show manager assignments
+                output += `Manager: ${manager.email}\n`;
+                managees.forEach(managee => {
+                    output += `${managee} -> ${manager.email}\n`;
+                    csvOutput += `${managee},${manager.email}\n`;
+                    assignmentCount++;
+                });
+                output += "\n" + "=".repeat(80) + "\n\n";
+            });
+            
+            processedOutput = csvOutput;
+            
+            // Update UI
+            document.getElementById('totalUsers').textContent = filteredKLHUsers.length;
+            document.getElementById('totalManagers').textContent = managers.length;
+            document.getElementById('assignmentsCreated').textContent = assignmentCount;
+            document.getElementById('outputArea').textContent = output || 'No assignments generated. Please check your data files.';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadCSV() {
+            if (!processedOutput) return;
+
+            const blob = new Blob([processedOutput], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'klh_manager_assignments.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
